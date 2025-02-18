@@ -1,0 +1,125 @@
+services:
+  cassandra1:
+    image: cassandra:latest
+    container_name: cassandra1
+    environment:
+      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
+      - CASSANDRA_SEEDS=cassandra1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra1
+    ports:
+      - "9042:9042"
+    networks:
+      - cassandra_network
+    volumes:
+      - ./cassandra_data1:/var/lib/cassandra
+
+  cassandra2:
+    image: cassandra:latest
+    container_name: cassandra2
+    environment:
+      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
+      - CASSANDRA_SEEDS=cassandra1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra2
+    ports:
+      - "9043:9042"
+    depends_on:
+      - cassandra1
+    networks:
+      - cassandra_network
+    volumes:
+      - ./cassandra_data2:/var/lib/cassandra
+
+  cassandra3:
+    image: cassandra:latest
+    container_name: cassandra3
+    environment:
+      - CASSANDRA_CLUSTER_NAME=cassandra-cluster
+      - CASSANDRA_SEEDS=cassandra1
+      - CASSANDRA_BROADCAST_ADDRESS=cassandra3
+    ports:
+      - "9044:9042"
+    depends_on:
+      - cassandra1
+    networks:
+      - cassandra_network
+    volumes:
+      - ./cassandra_data3:/var/lib/cassandra
+
+networks:
+  cassandra_network:
+    driver: bridge
+
+
+
+
+
+
+
+# # see: https://docs.datastax.com/en/docker/docs/managing/recommended-settings.html
+
+# # NOTE: his docker-compose file is for a 3 node cluster with DSE Studio. The user of compuer resourses are limited 
+# # to ensure this cluster can run simultaneously with other clusters on the same host (i.e. Cluouders, Postgres, 
+# # MongoDB, etc.)If you want more performance from the Cassandra cluster, you can increase the resources for each node.
+
+# services:
+
+#   DSE-N1:
+#     image: datastax/dse-server:6.8.16-ubi7
+#     command: ["-k", "-g", "-s"]
+#     container_name: DSE-N1
+#     ports:
+#       - 9042:9042
+#       - 8182:8182
+#       - 9077:9077
+#     volumes:
+#       - ./dse-shared:/home/shared
+#     environment:
+#       - DS_LICENSE=accept
+#       - SEEDS=DSE-N1, DSE-N2, DSE-N3
+#     restart: always   
+
+#   DSE-N2:
+#     image: datastax/dse-server:6.8.16-ubi7
+#     command: ["-k", "-g", "-s"]
+#     container_name: DSE-N2
+#     ports:
+#       - 9043:9042
+#       - 8183:8182
+#       - 9078:9077
+#     volumes:
+#       - ./dse-shared:/home/shared
+#     environment:
+#       - DS_LICENSE=accept
+#       - SEEDS=DSE-N1, DSE-N2, DSE-N3
+#     restart: always 
+#     depends_on:
+#       - DSE-N1
+
+#   DSE-N3:
+#     image: datastax/dse-server:6.8.16-ubi7
+#     command: ["-k", "-g", "-s"]
+#     container_name: DSE-N3
+#     ports:
+#       - 9044:9042
+#       - 8184:8182
+#       - 9079:9077
+#     volumes:
+#       - ./dse-shared:/home/shared
+#     environment:
+#       - DS_LICENSE=accept
+#       - SEEDS=DSE-N1, DSE-N2, DSE-N3
+#     restart: always 
+#     depends_on:
+#       - DSE-N2
+ 
+#   DSE-STUDIO:
+#     image: datastax/dse-studio:latest
+#     container_name: DSE-STUDIO
+#     hostname: DSE-STUDIO
+#     ports:
+#       # The Web UI exposed to our host
+#       - "9091:9091"
+#     volumes:
+#       - ./dse-shared:/home/shared
+#     environment:
+#       - DS_LICENSE=accept
